@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"><!--"https://www.google.com/css/maia.css"-->
+    <!-- The CSS package above applies Google styling to buttons and other elements. -->
+
+    <style>
+    .square {
+    float: left;
+    width: 20px;
+    height: 20px;
+    margin: 3px;
+    border: 1px solid rgba(0, 0, 0, .2);
+    }
+    
+    .invisibleSquare {
+    float: left;
+    width: 20px;
+    height: 20px;
+    margin: 3px;
+    border: 1px solid rgba(0, 0, 0, 0);
+    }
+    
+    .buttonWidth{
+    width:37%;
+    float: left;
+    cursor:pointer;
+    border: 1px solid #bfbfbf; 
+    }
+    
+    .buttonDepth:hover {
+    padding: 2px;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .buttonDepth:active {
+    transform: translateY(1px);
+    }
+    
+    .center {
+    margin:auto;
+    width: 90%;
+    padding: 10px;
+    }
+    
+    .first-row{
+    padding-left: 5px;
+    padding-bottom: 4px;
+    }
+    
+    .row{
+    margin-top: 16px;
+    padding-left: 5px;
+    padding-bottom: 4px;
+    }
+    
+    .summary-illuminate:hover{
+    background: #ffffb3;
+    }
+    
+    .evidence-illuminate:hover{
+    background: #ccffcc;
+    }
+    
+    .commentary-illuminate:hover{
+    background: #ccf2ff;
+    }
+    
+    .unmarked-illuminate:hover{
+    background: #f2f2f2;
+    }
+    
+    #row-update{
+    padding-top: 55px;
+    padding-left: 5px;
+    padding-bottom: 4px;
+    }
+    
+    #button-update{
+    width: 37%;
+    }
+    
+    #button-bugReport{
+    width: 37%
+    }
+    
+    div#label{
+    padding-top: 5px;
+    }
+
+    .type-label{
+    padding-left: 5px;
+    }
+    
+    .num-label{
+    padding-left: 2px;
+    }
+    
+    #updating{
+    padding-left: 5px;
+    }
+    
+    </style>
+  </head>
+  <body>
+     
+   <div class="center">
+     <div class="first-row summary-illuminate">
+          <div class="square" style="background:#f3f315"></div>
+          <button class="buttonSummary buttonWidth buttonDepth">Highlight</button>
+          <div id="label">
+            <label class="type-label">Summary:</label>
+            <label id="summary-label" class="num-label">...%</label>
+          </div>
+     </div>
+   
+     <div class="row evidence-illuminate">
+          <div class="square" style="background:#39ff14"></div>
+          <button class="buttonEvidence buttonWidth buttonDepth">Highlight</button>
+          <div id="label">
+            <label class="type-label">Evidence:</label>
+            <label id="evidence-label" class="num-label">...%</label>
+          </div>
+     </div>
+     <div class="row commentary-illuminate">
+          <div class="square" style="background:#0dd5fc"></div>
+          <button class="buttonCommentary buttonWidth buttonDepth">Highlight</button>
+          <div id="label">
+            <label class="type-label">Commentary:</label>
+            <label id="commentary-label" class="num-label">...%</label>
+          </div>
+     </div>
+     <div class="row unmarked-illuminate">
+          <div class="square" style="background:#ffffff"></div>
+          <button class="buttonUnmarked buttonWidth buttonDepth">Un-highlight</button>
+          <div id="label">
+            <label class="type-label">Unmarked:</label>
+            <label id="unmarked-label" class="num-label">...%</label>
+          </div>
+     </div>
+     <div id="row-update" class='row'>
+          <div class="invisibleSquare"></div>
+          <button id="button-update" class="buttonWidth buttonDepth">Update Stats</button>
+          <div id="label">
+            <label id="updating">Updating...</label>
+          </div>
+     </div>
+  
+     <div class="row">
+          <div class="invisibleSquare"></div>
+          <button id="button-Instructions" class="buttonWidth buttonDepth">Instructions</button>
+          <div id='label'>
+            <label id='updating'></label>
+          </div>
+     </div>
+     
+     <div class="row error-banner">
+          <div class="invisibleSquare"></div>
+          <div id="label">
+            <label id="UCS"></label>
+          </div>
+     </div>
+   </div>
+
+     <script src="https://www.gstatic.com/firebasejs/5.8.2/firebase.js"></script>
+     <script>
+     // Initialize Firebase
+     var config = {
+     apiKey: "",
+     authDomain: "",
+     databaseURL: "",
+     projectId: "",
+     storageBucket: "",
+     messagingSenderId: ""
+     };
+     firebase.initializeApp(config);
+     </script>
+     
+     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js">
+     </script>
+
+<script>
+//callback function
+function onSuccess(stat){
+   $('#summary-label').text(Math.floor(stat[0]*10000)/100 + '%');
+   $('#commentary-label').text(Math.floor(stat[1]*10000)/100 + '%');
+   $('#evidence-label').text(Math.floor(stat[2]*10000)/100 + '%');
+   $('#unmarked-label').text(Math.floor(stat[3]*10000)/100 + '%');
+   if(stat[4] != 0){
+     $('#UCS').text("# Strange Color Sightings: " + stat[4]);
+   }
+   else if(stat[4] == 0){
+     $('#UCS').text("");
+   }
+   $('#updating').text('');
+}
+//updates side-menu when add-on is started
+google.script.run.withSuccessHandler(onSuccess).statsLogger(true);
+//google.script.run.withSuccessHandler(google.script.run.logger).charLength();
+//the second google.script.run doesn't update the log if the first google.script.run does.
+//globals do not persist between server calls
+
+// Attach click handlers after the Sidebar has loaded in Google Docs
+// & update stats on google servers + update the client side
+$(function() {
+
+   $('.buttonSummary').click(function() {
+     $('#updating').text('Updating...');
+     google.script.run.withSuccessHandler(onSuccess).highlightText("#f3f315");
+   });
+   
+   $('.buttonCommentary').click(function() {
+     $('#updating').text('Updating...');
+     google.script.run.withSuccessHandler(onSuccess).highlightText("#0dd5fc");
+   });
+   
+   $('.buttonEvidence').click(function() {
+     $('#updating').text('Updating...');
+     google.script.run.withSuccessHandler(onSuccess).highlightText('#39ff14');
+   });
+   
+   $('.buttonUnmarked').click(function() {
+     $('#updating').text('Updating...');
+     google.script.run.withSuccessHandler(onSuccess).highlightText(null);
+   });
+   
+   $('#button-update').click(function() {
+     $('#updating').text('Updating...');
+     google.script.run.withSuccessHandler(onSuccess).statsLogger(false);
+   });
+         
+   $('#button-Instructions').click(function() {
+     google.script.run.displayInstructions();
+   });
+     
+   
+   //$('#button-bugReport').click(function() {
+   //google.script.run.displayPopup();
+   //});
+ });
+</script>
+  </body>
+</html>
